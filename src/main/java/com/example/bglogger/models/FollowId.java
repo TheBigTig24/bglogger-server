@@ -12,7 +12,7 @@ public class FollowId implements Serializable {
     @Column(name = "following_user_id")
     private int followingId;
 
-    @Column(name = "follwed_user_id")
+    @Column(name = "followed_user_id")
     private int followedId;
 
     public FollowId() {};
