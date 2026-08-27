@@ -10,10 +10,10 @@ import jakarta.persistence.Embeddable;
 public class FollowId implements Serializable {
     
     @Column(name = "following_user_id")
-    private int followingId;
+    private Integer followingId;
 
     @Column(name = "followed_user_id")
-    private int followedId;
+    private Integer followedId;
 
     public FollowId() {};
     
