@@ -2,13 +2,16 @@ package com.example.bglogger.controllers;
 
 import java.net.URI;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.example.bglogger.dto.UserRegistrationDTO;
 import com.example.bglogger.models.User;
 import com.example.bglogger.services.UserService;
 
@@ -24,8 +27,8 @@ public class UserController {
     }
 
     @PostMapping(value = "/users", consumes = "application/json")
-    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
-        User savedUser = userService.save(user);
+    public ResponseEntity<User> createUser(@Valid @RequestBody UserRegistrationDTO userRegDTO) {
+        User savedUser = userService.registerNewUser(userRegDTO);
 
         URI location = ServletUriComponentsBuilder
             .fromCurrentRequest()
