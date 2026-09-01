@@ -4,7 +4,10 @@ import java.net.URI;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -15,6 +18,7 @@ import com.example.bglogger.services.UserService;
 import jakarta.validation.Valid;
 
 @RestController
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -23,7 +27,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping(value = "/users", consumes = "application/json")
+    @PostMapping(value = "/", consumes = "application/json")
     public ResponseEntity<User> createUser(@Valid @RequestBody UserRegistrationDTO userRegDTO) {
         User savedUser = userService.registerNewUser(userRegDTO);
 
@@ -34,5 +38,11 @@ public class UserController {
             .toUri();
 
         return ResponseEntity.created(location).body(savedUser);
+    }
+
+    @PutMapping(value = "/verify")
+    public ResponseEntity<Void> verifyUserEmail(@RequestParam String token) {
+        userService.verifyEmail(token);
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,11 +1,20 @@
 package com.example.bglogger.services;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.Base64;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.bglogger.dto.UserRegistrationDTO;
+import com.example.bglogger.exceptions.InvalidTokenException;
+import com.example.bglogger.exceptions.TokenExpiredException;
 import com.example.bglogger.exceptions.UserAlreadyExistsException;
+import com.example.bglogger.models.EmailVerification;
 import com.example.bglogger.models.User;
+import com.example.bglogger.repositories.EmailVerificationRepository;
 import com.example.bglogger.repositories.UserRepository;
 
 @Service
@@ -13,13 +22,23 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailVerificationRepository emailVerificationRepository;
+    private final EmailService emailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(
+        UserRepository userRepository,
+        PasswordEncoder passwordEncoder,
+        EmailVerificationRepository emailVerificationRepository,
+        EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailVerificationRepository = emailVerificationRepository;
+        this.emailService = emailService;
     }
 
+    @Transactional
     public User registerNewUser(UserRegistrationDTO dto) {
+        // user registration logic
         String lowerCaseEmail = dto.getEmail().toLowerCase();
 
         if (userRepository.findByEmail(lowerCaseEmail).isPresent()) {
@@ -31,7 +50,44 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setUsername(dto.getUsername());
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // generate verification token
+        String token = generateSecureToken();
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(30);
+
+        EmailVerification verification = new EmailVerification();
+        verification.setUser(savedUser);
+        verification.setToken(token);
+        verification.setExpiresAt(expiresAt);
+        emailVerificationRepository.save(verification);
+
+        emailService.sendVerificationEmail(dto.getEmail(), "Account Verification", token);
+
+        return savedUser;
+    }
+
+    private String generateSecureToken() {
+        byte[] randomBytes = new byte[32];
+        new SecureRandom().nextBytes(randomBytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+    }
+
+    @Transactional
+    public void verifyEmail(String token) {
+        EmailVerification verification = emailVerificationRepository.findByToken(token)
+            .orElseThrow(() -> new InvalidTokenException("The link is invalid."));
+
+        if (verification.getExpiresAt().isBefore(LocalDateTime.now())) {
+            emailVerificationRepository.delete(verification);
+            throw new TokenExpiredException("The link has expired.");
+        }
+
+        User user = verification.getUser();
+        user.setEmailVerified(true);
+        userRepository.save(user);
+
+        emailVerificationRepository.delete(verification);
     }
     
 }
