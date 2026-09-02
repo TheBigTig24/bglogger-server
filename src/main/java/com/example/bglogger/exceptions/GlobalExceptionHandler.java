@@ -9,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import io.jsonwebtoken.io.IOException;
 import jakarta.mail.MessagingException;
 
 @RestControllerAdvice
@@ -40,6 +41,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({InvalidTokenException.class, TokenExpiredException.class})
     public ResponseEntity<String> handleVerificationExceptions(RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<String> handleIOException(IOException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 }

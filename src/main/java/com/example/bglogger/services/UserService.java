@@ -105,8 +105,16 @@ public class UserService {
         user.setBio(dto.getBio());
         user.setDisplayName(dto.getDisplayName());
         user.setUsername(dto.getUsername());
+        user.setUpdatedAt(LocalDateTime.now());
 
         return userRepository.save(user);
+    }
+
+    public User updateAvatar(Integer id, String imgUrl) {
+        User foundUser = userRepository.findById(id).orElseThrow();
+        foundUser.setPfp(imgUrl);
+        foundUser.setUpdatedAt(LocalDateTime.now());
+        return userRepository.save(foundUser);
     }
     
 }
