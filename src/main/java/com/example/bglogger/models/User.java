@@ -37,8 +37,8 @@ public class User {
     @Column(name = "role", nullable = false)
     private Integer role = 1;
 
-    @Size(max = 50, message = "Invalid role")
-    @Column(name = "display_name", length = 50)
+    @Size(max = 30, message = "Display name cannot exceed 30 characters")
+    @Column(name = "display_name", length = 30)
     private String displayName;
 
     @Size(max = 500, message = "Bio cannot exceed 500 characters")

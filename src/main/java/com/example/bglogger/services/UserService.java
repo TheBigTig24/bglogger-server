@@ -3,15 +3,18 @@ package com.example.bglogger.services;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.bglogger.dto.UserProfileEditDTO;
 import com.example.bglogger.dto.UserRegistrationDTO;
 import com.example.bglogger.exceptions.InvalidTokenException;
 import com.example.bglogger.exceptions.TokenExpiredException;
 import com.example.bglogger.exceptions.UserAlreadyExistsException;
+import com.example.bglogger.exceptions.UsernameTakenException;
 import com.example.bglogger.models.EmailVerification;
 import com.example.bglogger.models.User;
 import com.example.bglogger.repositories.EmailVerificationRepository;
@@ -88,6 +91,22 @@ public class UserService {
         userRepository.save(user);
 
         emailVerificationRepository.delete(verification);
+    }
+
+    @Transactional
+    public User editProfileDetails(UserProfileEditDTO dto) {
+        User user = userRepository.findById(dto.getId()).orElseThrow();
+
+        Optional<User> optUser = userRepository.findByUsername(dto.getUsername());
+        if ( optUser.isPresent() && (optUser.get().getId() != dto.getId()) ) {
+            throw new UsernameTakenException("Username is already taken.");
+        }
+
+        user.setBio(dto.getBio());
+        user.setDisplayName(dto.getDisplayName());
+        user.setUsername(dto.getUsername());
+
+        return userRepository.save(user);
     }
     
 }

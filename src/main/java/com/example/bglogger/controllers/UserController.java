@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.example.bglogger.dto.UserProfileEditDTO;
 import com.example.bglogger.dto.UserRegistrationDTO;
 import com.example.bglogger.models.User;
 import com.example.bglogger.services.UserService;
@@ -44,5 +45,11 @@ public class UserController {
     public ResponseEntity<Void> verifyUserEmail(@RequestParam String token) {
         userService.verifyEmail(token);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping(value = "/edit-profile", consumes = "application/json")
+    public ResponseEntity<User> editProfile(@Valid @RequestBody UserProfileEditDTO userDTO) {
+        User editedUser = userService.editProfileDetails(userDTO);
+        return ResponseEntity.ok().body(editedUser);
     }
 }
