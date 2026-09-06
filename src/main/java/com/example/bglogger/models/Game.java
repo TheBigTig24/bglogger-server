@@ -1,6 +1,7 @@
 package com.example.bglogger.models;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,7 +23,7 @@ public class Game {
     @Column(name = "id")
     private Integer id;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "externalId", unique = true, nullable = false)
     private Integer externalId;
 
     @Column(name = "name", nullable = false)
@@ -41,7 +42,7 @@ public class Game {
     private float complexity;
 
     @Column(name = "genre")
-    private String[] genre;
+    private List<String> genre;
 
     @Column(name = "cover_image_url")
     private String coverImageUrl;

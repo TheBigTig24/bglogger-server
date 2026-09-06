@@ -25,7 +25,16 @@ public class ReviewController {
     }
     
     @PostMapping(value = "/", consumes = "application/json")
-    public ResponseEntity<Review> postReview(@Valid @RequestBody ReviewDTO reviewDTO) {
-        return null;
+    public ResponseEntity<ReviewDTO> postReview(@Valid @RequestBody ReviewDTO reviewDTO) {
+        Review review = reviewService.createNewReview(reviewDTO);
+
+        ReviewDTO response = new ReviewDTO();
+        response.setGameId(review.getGame().getId());
+        response.setUserId(review.getUser().getId());
+        response.setBody(review.getBody());
+        response.setScoreCategory(review.getScoreCategory());
+        response.setListPosition(review.getListPosition());
+        
+        return ResponseEntity.ok().body(response);
     }
 }
