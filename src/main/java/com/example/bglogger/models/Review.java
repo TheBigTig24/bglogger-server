@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -36,8 +37,12 @@ public class Review {
     @Column(name = "body", columnDefinition = "TEXT")
     private String body;
 
-    @Column(name = "score", nullable = false)
-    private float score;
+    @NotBlank(message = "Score category is required")
+    @Column(name = "score_category", nullable = false)
+    private String scoreCategory;
+
+    @Column(name = "list_position", nullable = false)
+    private int listPosition;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

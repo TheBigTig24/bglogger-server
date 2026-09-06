@@ -32,7 +32,8 @@ public class UserService {
         UserRepository userRepository,
         PasswordEncoder passwordEncoder,
         EmailVerificationRepository emailVerificationRepository,
-        EmailService emailService) {
+        EmailService emailService
+    ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailVerificationRepository = emailVerificationRepository;

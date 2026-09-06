@@ -22,6 +22,9 @@ public class Game {
     @Column(name = "id")
     private Integer id;
 
+    @Column(unique = true, nullable = false)
+    private Integer externalId;
+
     @Column(name = "name", nullable = false)
     private String name;
 
