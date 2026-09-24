@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.example.bglogger.dto.FollowRequestDTO;
 import com.example.bglogger.dto.UserProfileEditDTO;
 import com.example.bglogger.dto.UserRegistrationDTO;
+import com.example.bglogger.models.Follow;
 import com.example.bglogger.models.User;
 import com.example.bglogger.services.CloudinaryService;
 import com.example.bglogger.services.UserService;
@@ -73,5 +75,17 @@ public class UserController {
         User user = userService.updateAvatar(id, imageUrl);
 
         return ResponseEntity.ok().body(user);
+    }
+
+    @PostMapping(value = "/send-follow", consumes = "application/json")
+    public ResponseEntity<Follow> sendFollowRequest(@Valid @RequestBody FollowRequestDTO followRequestDTO) {
+        Follow request = userService.sendRequest(followRequestDTO);
+        return ResponseEntity.ok().body(request);
+    }
+
+    @PutMapping(value = "/accept-follow", consumes = "application/json")
+    public ResponseEntity<Follow> handleFollowRequest(@Valid @RequestBody FollowRequestDTO followRequestDTO) {
+        Follow request = userService.handleRequest(followRequestDTO);
+        return ResponseEntity.ok().body(request);
     }
 }

@@ -9,15 +9,19 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.bglogger.dto.FollowRequestDTO;
 import com.example.bglogger.dto.UserProfileEditDTO;
 import com.example.bglogger.dto.UserRegistrationDTO;
 import com.example.bglogger.exceptions.InvalidTokenException;
 import com.example.bglogger.exceptions.TokenExpiredException;
 import com.example.bglogger.exceptions.UserAlreadyExistsException;
+import com.example.bglogger.exceptions.UserNotFoundException;
 import com.example.bglogger.exceptions.UsernameTakenException;
 import com.example.bglogger.models.EmailVerification;
+import com.example.bglogger.models.Follow;
 import com.example.bglogger.models.User;
 import com.example.bglogger.repositories.EmailVerificationRepository;
+import com.example.bglogger.repositories.UserFollowsRepository;
 import com.example.bglogger.repositories.UserRepository;
 
 @Service
@@ -27,17 +31,20 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationRepository emailVerificationRepository;
     private final EmailService emailService;
+    private final UserFollowsRepository userFollowsRepository;
 
     public UserService(
         UserRepository userRepository,
         PasswordEncoder passwordEncoder,
         EmailVerificationRepository emailVerificationRepository,
-        EmailService emailService
+        EmailService emailService,
+        UserFollowsRepository userFollowsRepository
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailVerificationRepository = emailVerificationRepository;
         this.emailService = emailService;
+        this.userFollowsRepository = userFollowsRepository;
     }
 
     @Transactional
@@ -116,6 +123,45 @@ public class UserService {
         foundUser.setPfp(imgUrl);
         foundUser.setUpdatedAt(LocalDateTime.now());
         return userRepository.save(foundUser);
+    }
+
+    public Follow sendRequest(FollowRequestDTO dto) {
+
+        if (dto.getFollowedId().equals(dto.getFollowingId())) {
+            throw new IllegalArgumentException("Users cannot follow themselves.");
+        }
+
+        Optional<Follow> existingFollow = userFollowsRepository.findByFollowedIdAndFollowingId(
+            dto.getFollowedId(),
+            dto.getFollowingId()
+        );
+
+        if (existingFollow.isPresent()) {
+            throw new IllegalStateException("Follow request already exists.");
+        }
+
+        Follow follow = new Follow();
+        User followed = userRepository.getReferenceById(dto.getFollowedId());
+        User following = userRepository.getReferenceById(dto.getFollowingId());
+
+        follow.setFollowed(followed);
+        follow.setFollowing(following);
+        follow.setStatus("PENDING");
+        follow.setCreatedAt(LocalDateTime.now());
+
+        return userFollowsRepository.save(follow);
+    }
+
+    public Follow handleRequest(FollowRequestDTO dto) {
+        Optional<Follow> follow = userFollowsRepository.findByFollowedIdAndFollowingId(dto.getFollowedId(), dto.getFollowingId());
+
+        if (!follow.isPresent()) {
+            throw new UserNotFoundException("Follow request does not exist.");
+        }
+
+        Follow f = follow.get();
+        f.setStatus(dto.getStatus());
+        return userFollowsRepository.save(f);
     }
     
 }

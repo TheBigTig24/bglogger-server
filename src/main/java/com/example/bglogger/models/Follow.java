@@ -2,6 +2,9 @@ package com.example.bglogger.models;
 
 import java.time.LocalDateTime;
 
+import com.example.bglogger.annotations.ValueOfEnum;
+import com.example.bglogger.enumerations.FollowRequestStatus;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -34,6 +37,7 @@ public class Follow {
     private User followed;
 
     @Column(name = "status", nullable = false)
+    @ValueOfEnum(enumClass = FollowRequestStatus.class, message = "Status must be PENDING, ACCEPTED, or DECLINED")
     private String status;
 
     @Column(name = "created_at", nullable = false, updatable = false)
